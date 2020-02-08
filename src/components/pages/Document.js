@@ -12,7 +12,7 @@ const Document = ({
   const socket = socketIOClient(endpoint)
 
   const handleOnChange = (e) =>{
-      setValue(e.target.value)
+    setValue(e.target.value)
   }
   var manager = socketIOClient.Manager(endpoint, { /* options */ });
     manager.socket('/namespace');
@@ -44,26 +44,26 @@ const Document = ({
   ,[value])
 
   React.useEffect(() => {
-    return () => {
-        console.log('Leaving Socket');
-        socket.emit('leave room', {
-          room: 'test-room'
-        })
-      }}
-  ,[]);
-
-  React.useEffect(() => {
+    console.log(documentID);
+    socket.emit('getValue', documentID)
     socket.on('getValue', ({id, value}) => {
+      console.log(documentID);
       if(id === documentID){
           setValue(value)
       }
+      console.log(value);
     })
-  },[]); 
+    
+    return () => {
+        console.log('Leaving Socket');
+        socket.disconnect() 
+      }}
+  ,[match.params.id]);
 
   return (
     <div className="document">
-      {match.params.id}
-      <textarea rows="4" cols="50" value={value} onChange={handleOnChange}/>
+      <h1>{documents.filter(document => document.id === documentID)[0].title}</h1>
+      <textarea value={value} onChange={handleOnChange}/>
     </div>
   )
 }

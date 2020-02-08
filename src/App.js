@@ -26,7 +26,7 @@ const StyledContainer = styled.div`
   & .home {
     width: 20rem;
     text-align: center;
-    box-shadow: 10px 2px 5px 0px rgba(0,0,0,0.21);
+    box-shadow: 5px 2px 5px 0px rgba(0,0,0,0.21);
     min-height: 100vh;
 
     & h1 {
@@ -49,6 +49,13 @@ const StyledContainer = styled.div`
          height: 6rem;
          padding: 1.5rem 1rem;
          border-bottom: 1px solid #667D80;
+
+         &.active {
+           background: #66C4CC;
+           & *{
+            color: #CCFBFF;
+           }
+         }
 
          & a {
            width: 100%;
@@ -89,6 +96,10 @@ const StyledContainer = styled.div`
     flex-direction: column;
     justify-content: center;
 
+    & h1 {
+      margin-top: 1rem;
+    }
+
     & textarea {
       display: block;
       margin: 2rem 10rem;
@@ -120,12 +131,23 @@ const App = () => {
     setIsLoggedIn(!!localStorage.getItem('email'))
   }
 
+  const handleOnCreateDocument = () => {
+    const title = prompt("Document Title")
+    if(title !== ""){
+      axios.post('/api/newDocument',{
+        title,
+        author: localStorage.getItem('email')
+      }).then(
+        // eslint-disable-next-line no-restricted-globals
+        location.reload()
+      )
+    }
+  }
+
   React.useEffect(() => {
     const getDocuments =  async () => {
       const Documents = await axios.get('/api/documentsInfo')
       setDocuments(Documents.data)
-      console.log(Documents);
-      
     }
     getDocuments()
     setIsLoggedIn(!!localStorage.getItem('email'))
@@ -137,14 +159,29 @@ const App = () => {
       <StyledContainer>
         {isLoggedIn ?
         <React.Fragment>
-          <Home 
-            handleLogOut={handleLogOut}
-            documents={documents}
-          />
           <Switch>
-            <Route path="/document/:id" component={props => <Document 
-              {...props}
-              documents={documents}
+            <Route path="/document/:id" component={props =>documents.length === 0 ?
+            <div>Loading</div> :
+            <React.Fragment>
+              <Home 
+                  {...props}
+                  handleLogOut={handleLogOut}
+                  documents={documents}
+              />
+              <Document 
+                {...props}
+                documents={documents}
+              />
+            </React.Fragment>
+            }/>
+
+            <Route path="/" component={props =>documents.length === 0 ?
+              <div>Loading</div> :
+              <Home 
+                {...props}
+                handleLogOut={handleLogOut}
+                documents={documents}
+                handleOnCreateDocument={handleOnCreateDocument}
             />}/>
           </Switch> 
         </React.Fragment>
