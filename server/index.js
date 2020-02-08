@@ -33,17 +33,16 @@ fs.createReadStream(`${baseDir}/Documents.csv`)
   })
 
 io.on('connection', socket => {
-
+  
   socket.on('getValue', (id) => {
-    io.sockets.emit('getValue', {id, value: valueStorage[id]})
+    socket.broadcast.emit('getValue', {id, value: valueStorage[id]})
   })
   
   socket.on('changeValue', ({id, value}) => {
-    valueStorage[id] = value
-    io.sockets.emit('getValue', {id, value})
-  })
-
-  socket.on('disconnect', () => {
+    if(valueStorage[id] !== value){
+      valueStorage[id] = value
+      socket.broadcast.emit('getValue', {id, value})
+    }
   })
 })
 

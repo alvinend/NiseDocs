@@ -6,25 +6,58 @@ const endpoint = "localhost:3001"
 const Document = ({
   match
 }) => {
-  const socket = socketIOClient(endpoint);
   const documentID = match.params.id
   const [value, setValue] = React.useState('')
+  const socket = socketIOClient(endpoint)
 
   const handleOnChange = (e) =>{
-    socket.emit('changeValue', ({id: documentID, value: e.target.value}))
+      setValue(e.target.value)
   }
+  var manager = socketIOClient.Manager(endpoint, { /* options */ });
+    manager.socket('/namespace');
+    manager.on('connect_error', function() {
+        // eslint-disable-next-line no-restricted-globals
+        location.reload()
+    })
+  
+    manager.on('connect_error', function() {
+      // eslint-disable-next-line no-restricted-globals
+      location.reload()
+   })
+
+    manager.on('connect_error', function() {
+      // eslint-disable-next-line no-restricted-globals
+      location.reload()
+    })
+
 
   React.useEffect(() => {
-    setInterval(() => {
-      socket.emit('getValue', documentID)
-    }, 100000)
-    socket.on('getValue', ({id, value}) => {
-       if(id === documentID){
-          setValue(value)
-       }
-    })
+    const timer = setInterval(() => {
+      console.log("Sended");
+      
+      socket.emit('changeValue', ({id: documentID, value: value}))
+    }, 2000)
+
+    return () => clearTimeout(timer)
   }
-  ,[documentID, socket])
+  ,[value])
+
+  React.useEffect(() => {
+    return () => {
+        console.log('Leaving Socket');
+        socket.emit('leave room', {
+          room: 'test-room'
+        })
+      }}
+  ,[]);
+
+  React.useEffect(() => {
+    socket.on('getValue', ({id, value}) => {
+      if(id === documentID){
+          setValue(value)
+      }
+    })
+  },[]); 
 
   return (
     <div>
