@@ -1,60 +1,70 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+import Login from './components/pages/Login';
+import Document from './components/pages/Document';
+import Home from './components/pages/Home';
+import axios from 'axios';
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: '',
-      greeting: ''
-    };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+const App = () => {
+
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false)
+  const [email, setEmail] = React.useState('')
+  const [documents, setDocuments] = React.useState([])
+
+  const handleOnChange = (e) => setEmail(e.target.value)
+  const handleOnClick = () => {
+    localStorage.setItem('email', email)
+    setIsLoggedIn(!!localStorage.getItem('email'))
+  }
+  const handleLogOut = () => {
+    localStorage.setItem('email', '')
+    setIsLoggedIn(!!localStorage.getItem('email'))
   }
 
-  handleChange(event) {
-    this.setState({ name: event.target.value });
+  React.useEffect(() => {
+    const getDocuments =  async () => {
+      const Documents = await axios.get('/api/documentsInfo')
+      setDocuments(Documents.data)
+      console.log(Documents);
+      
+    }
+    getDocuments()
+    setIsLoggedIn(!!localStorage.getItem('email'))
   }
+  ,[])
 
-  handleSubmit(event) {
-    event.preventDefault();
-    fetch(`/api/greeting?name=${encodeURIComponent(this.state.name)}`)
-      .then(response => response.json())
-      .then(state => this.setState(state));
-  }
-
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <form onSubmit={this.handleSubmit}>
-            <label htmlFor="name">Enter your name: </label>
-            <input
-              id="name"
-              type="text"
-              value={this.state.name}
-              onChange={this.handleChange}
+  return (
+    <Router>
+      <div>
+        {isLoggedIn ?
+        <Switch>
+          <Route path="/document/:id" component={Document}/>
+          <Route path="/">
+            <Home 
+              handleLogOut={handleLogOut}
+              documents={documents}
             />
-            <button type="submit">Submit</button>
-          </form>
-          <p>{this.state.greeting}</p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+          </Route>
+        </Switch> :
+        <Switch>
+          <Route path="/">
+            <Login
+              email={email}
+              handleOnChange={handleOnChange}
+              handleOnClick={handleOnClick}
+            />
+          </Route>
+        </Switch>
+        }
+        
       </div>
-    );
-  }
+    </Router>
+  )
 }
 
-export default App;
+export default App
