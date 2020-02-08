@@ -4,7 +4,8 @@ import socketIOClient from "socket.io-client";
 const endpoint = "localhost:3001"
 
 const Document = ({
-  match
+  match,
+  documents
 }) => {
   const documentID = match.params.id
   const [value, setValue] = React.useState('')
@@ -60,8 +61,8 @@ const Document = ({
   },[]); 
 
   return (
-    <div>
-      WELCOME TO DOCUMENT
+    <div className="document">
+      {match.params.id}
       <textarea rows="4" cols="50" value={value} onChange={handleOnChange}/>
     </div>
   )

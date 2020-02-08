@@ -6,14 +6,16 @@ const Home = ({
   documents
 }) => {
   return (
-    <div>
-      Welcome {localStorage.getItem('email')}
-      <h1>Documents: </h1>
+    <div className="home">
+      <h1>Welcome {localStorage.getItem('email')}</h1>
       <ul>
        {documents && documents.map( document => <li>
-        <Link to={`/document/${document.id}`}>{document.title}</Link>
+        <Link to={`/document/${document.id}`}>
+          {document.title} <span> Text-Document</span>
+        </Link>
        </li>)}
       </ul>
+      <button onClick={handleLogOut}>新規ドキュメント</button>
       <button onClick={handleLogOut}>Log Out</button>
     </div>
   )
